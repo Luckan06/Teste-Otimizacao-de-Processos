@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Produção</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://img.icons8.com/office/16/000000/activity-history.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Controle</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="#" id="link-resultados">Resultados</a></li>
+                    <li><a href="#" id="link-processos">Processos</a></li>
+                    <li><a href="#" id="link-programador">Programador</a></li>
+                    <li><a href="#" id="link-configuracoes">Configurações</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <img src="/images/SENAI.png" alt="Logo SENAI" class="sidebar-logo">
+            </div>
+        </aside>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<main class="main-content">
+
+    <!-- ======================================================= -->
+    <!-- SEÇÃO 1: RESULTADOS (DASHBOARD) - Bloco Independente  -->
+    <!-- ======================================================= -->
+    <div id="secao-resultados">
+        <header class="main-header">
+            <nav class="tabs">
+                <a href="#" class="tab active">Resultados e Indicadores</a>
+            </nav>
+            <div class="header-controls">
+                <div class="date-selector">
+                    <label for="date-filter-resultados">Filtrar por Data:</label>
+                    <input type="date" id="date-filter-resultados">
+                    <button id="btn-clear-date-resultados" class="clear-btn">Limpar</button>
+                </div>
+                <div class="process-selector">
+                    <label for="processoId">Visualizando Processo:</label>
+                    <select id="processoId">
+                        <option value="processo 1">Processo 1</option>
+                        <option value="processo 2">Processo 2</option>
+                        <option value="processo 3">Processo 3</option>
+                        <option value="processo 4">Processo 4</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        <section class="kpi-section">
+            <h2>Indicadores de Performance</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-icon">⏱️</span>
+                    <p class="kpi-title">Tempo Médio de Ciclo</p>
+                    <p class="kpi-value" id="kpi-ciclo-medio">-- s</p>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">🔄</span>
+                    <p class="kpi-title">Tempo Médio de Troca</p>
+                    <p class="kpi-value" id="kpi-troca-media">-- s</p>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">📉</span>
+                    <p class="kpi-title">% de Refugo</p>
+                    <p class="kpi-value text-red" id="kpi-refugo">-- %</p>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">⚙️</span>
+                    <p class="kpi-title">% de Disponibilidade</p>
+                    <p class="kpi-value text-green" id="kpi-disponibilidade">-- %</p>
+                </div>
+            </div>
+        </section>
+        <section class="charts-section">
+            <h2>Análise Visual</h2>
+            <div class="chart-grid">
+                <!-- Card do Gráfico de Refugo (Estilo do Frontend 1) -->
+                <div class="chart-card">
+                    <div class="chart-area">
+                        <canvas id="graficoRefugo"></canvas>
+                    </div>
+                    <p class="chart-title">Análise de Produção e Refugo</p>
+                    <div class="chart-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Produção Total:</span>
+                            <span class="summary-value" id="summary-refugo-total">-- peças</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Peças Boas:</span>
+                            <span class="summary-value text-green" id="summary-refugo-boas">-- peças</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Refugo:</span>
+                            <span class="summary-value text-red" id="summary-refugo-refugadas">-- peças</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card do Gráfico de Disponibilidade (Estilo do Frontend 1) -->
+                <div class="chart-card">
+                    <div class="chart-area">
+                        <canvas id="graficoDisponibilidade"></canvas>
+                    </div>
+                    <p class="chart-title">Análise de Disponibilidade</p>
+                    <div class="chart-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Tempo Produtivo Real:</span>
+                            <span class="summary-value" id="summary-disp-produtivo">--</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Tempo de Parada:</span>
+                            <span class="summary-value text-red" id="summary-disp-parada-total">--</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Peças Produzidas (no período):</span>
+                            <span class="summary-value" id="summary-disp-produzidas">-- peças</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Perda por Parada (Estimado):</span>
+                            <span class="summary-value text-red" id="summary-disp-perda">-- peças</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="oee-section">
+            <h2>Indicadores de Eficiência Global (OEE)</h2>
+            <div class="oee-grid">
+                <div class="oee-card">
+                    <h3 class="oee-title">OEE</h3>
+                    <p class="oee-value" id="oee-geral">-- %</p>
+                    <div class="oee-sub-metrics">
+                        <span>Disponibilidade: <strong id="oee-disponibilidade">-- %</strong></span>
+                        <span>Performance: <strong id="oee-performance">-- %</strong></span>
+                        <span>Qualidade: <strong id="oee-qualidade">-- %</strong></span>
+                    </div>
+                </div>
+                <div class="oee-card">
+                    <h3 class="oee-title">MTTR</h3>
+                    <p class="oee-value" id="oee-mttr">-- min</p>
+                    <p class="oee-description">Tempo Médio para Reparo</p>
+                </div>
+                <div class="oee-card">
+                    <h3 class="oee-title">MTBF</h3>
+                    <p class="oee-value" id="oee-mtbf">-- h</p>
+                    <p class="oee-description">Tempo Médio Entre Falhas</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="analise-section">
+            <div class="analise-geral-card">
+                <h2>Análise Geral do Processo</h2>
+                <div id="analise-geral-container" class="analise-geral-grid">
+                    <p>Carregando análise geral...</p>
+                </div>
+            </div>
+            <div class="analise-turno-card">
+                <h2>Análise por Turno (Histórico Completo)</h2>
+                <div id="analise-turno-container" class="analise-grid">
+                    <p>Carregando análise por turno...</p>
+                </div>
+            </div>
+        </section>
+    </div> <!-- FIM DA SEÇÃO DE RESULTADOS -->
+
+
+    <!-- ======================================================= -->
+    <!-- SEÇÃO 2: PROCESSOS - Bloco Independente -->
+    <!-- ======================================================= -->
+    <div id="secao-processos" class="hidden">
+        <header class="main-header">
+            <nav class="tabs">
+                <a href="#" class="tab active">Visão Geral dos Processos</a>
+            </nav>
+            <div class="header-controls">
+                <div class="date-selector">
+                    <label for="date-filter-processos">Filtrar por Data:</label>
+                    <input type="date" id="date-filter-processos">
+                    <button id="btn-clear-date-processos" class="clear-btn">Limpar</button>
+                </div>
+            </div>
+        </header>
+        <section class="process-overview-section">
+            <div class="process-flow-container" id="process-flow-container">
+                <p>Carregando dados dos processos...</p>
+            </div>
+        </section>
+    </div> <!-- FIM DA SEÇÃO DE PROCESSOS -->
+
+
+    <!-- ======================================================= -->
+    <!-- SEÇÃO 3: PROGRAMADOR - Bloco Independente -->
+    <!-- ======================================================= -->
+    <div id="secao-programador" class="hidden">
+        <header class="main-header">
+            <nav class="tabs">
+                <a href="#" class="tab active">Ações do Programador</a>
+            </nav>
+        </header>
+        <section class="programador-section">
+            <div class="programador-grid">
+                <!-- Card de Registro de Ciclo -->
+                <div class="config-card">
+                    <h3>Registrar Novo Ciclo</h3>
+                    <form id="form-registrar-ciclo" class="config-form">
+                        <label for="processo-ciclo-select">Processo:</label>
+                        <select id="processo-ciclo-select" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+
+                        <label for="duracao-ciclo-input">Duração do Ciclo (em segundos):</label>
+                        <input type="number" id="duracao-ciclo-input" required min="1" placeholder="Ex: 95">
+
+                        <div class="pecas-input-grid">
+                            <div class="pecas-input-container">
+                                <label for="pecas-boas-ciclo-input">Peças Boas:</label>
+                                <input type="number" id="pecas-boas-ciclo-input" value="1" min="0" required>
+                            </div>
+                            <div class="pecas-input-container">
+                                <label for="refugo-ciclo-input">Peças Refugadas:</label>
+                                <input type="number" id="refugo-ciclo-input" value="0" min="0" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit">Registrar Ciclo</button>
+                    </form>
+                </div>
+
+                <!-- ======================================================= -->
+                <!-- CARD MODIFICADO: REGISTRAR PARADA DE MÁQUINA -->
+                <!-- ======================================================= -->
+                <div class="config-card">
+                    <h3>Registrar Parada de Máquina</h3>
+                    <form id="form-registrar-parada" class="config-form">
+                        <label for="processo-parada-select">Processo:</label>
+                        <select id="processo-parada-select" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+
+                        <label for="motivo-parada-select">Motivo:</label>
+                        <select id="motivo-parada-select" required>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Falha">Falha</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+
+                        <label for="duracao-parada-input">Duração da Parada (em segundos):</label>
+                        <input type="number" id="duracao-parada-input" required min="1" placeholder="Ex: 300">
+                        
+                        <button type="submit">Registrar Parada</button>
+                    </form>
+                </div>
+                <!-- ======================================================= -->
+                <!-- FIM DO CARD MODIFICADO -->
+                <!-- ======================================================= -->
+
+                <!-- Card de Registro de Tempo de Troca -->
+                <div class="config-card">
+                    <h3>Registrar Tempo de Troca</h3>
+                    <form id="form-registrar-troca" class="config-form">
+                        <label for="processo-troca-select">Processo:</label>
+                        <select id="processo-troca-select" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+                
+                        <label for="duracao-troca-input">Duração da Troca (em segundos):</label>
+                        <input type="number" id="duracao-troca-input" required min="1" placeholder="Ex: 120">
+                        
+                        <button type="submit">Registrar Troca</button>
+                    </form>
+                </div>
+
+                <!-- Card de Definir Metas -->
+                <div class="config-card">
+                    <h3>Definir Metas de Produção</h3>
+                    <form id="form-definir-meta" class="config-form">
+                        <label for="meta-processo-select">Processo:</label>
+                        <select id="meta-processo-select" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+
+                        <label for="meta-turno-select">Turno:</label>
+                        <select id="meta-turno-select" required>
+                            <option value="">Carregando turnos...</option>
+                        </select>
+
+                        <label for="meta-pecas-input">Meta de Peças (por turno):</label>
+                        <input type="number" id="meta-pecas-input" required min="0">
+                        
+                        <label for="meta-tempo-input">Tempo Planejado (em segundos):</label>
+                        <input type="number" id="meta-tempo-input" required min="0" value="28800">
+                        
+                        <button type="submit">Definir Meta</button>
+                    </form>
+                    <hr>
+                    <h4>Metas Atuais</h4>
+                    <ul id="lista-metas" class="item-list"><li>Carregando...</li></ul>
+                </div>
+            </div>
+        </section>
+    </div> <!-- FIM DA SEÇÃO DE PROGRAMADOR -->
+
+
+    <!-- ======================================================= -->
+    <!-- SEÇÃO 4: CONFIGURAÇÕES - Bloco Independente -->
+    <!-- ======================================================= -->
+    <div id="secao-configuracoes" class="hidden">
+        <header class="main-header">
+            <nav class="tabs">
+                <a href="#" class="tab active">Configurações Gerais</a>
+            </nav>
+        </header>
+        <section class="config-section">
+            <div class="config-grid">
+                <div class="config-card">
+                    <h3>Gerenciar Operadores</h3>
+                    <form id="form-add-operador" class="config-form"><label for="nome_operador">Nome:</label><input type="text" id="nome_operador" required><label for="matricula">Matrícula:</label><input type="text" id="matricula" required><button type="submit">Adicionar Operador</button></form>
+                    <hr>
+                    <h4>Operadores Cadastrados</h4>
+                    <ul id="lista-operadores" class="item-list"><li>Carregando...</li></ul>
+                </div>
+
+                <div class="config-card">
+                    <h3>Designar Operadores a Processos</h3>
+                    <form id="form-associar-operador" class="config-form">
+                        <label for="select-operador-assoc">Operador:</label>
+                        <select id="select-operador-assoc" required>
+                            <option value="">Selecione um operador...</option>
+                        </select>
+                        <label for="select-processo-assoc">Processo:</label>
+                        <select id="select-processo-assoc" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+                        <button type="submit">Designar</button>
+                    </form>
+                    <hr>
+                    <h4>Associações Atuais</h4>
+                    <ul id="lista-associacoes" class="item-list"><li>Carregando...</li></ul>
+                </div>
+                
+                <div class="config-card">
+                    <h3>Gerenciar Turnos do Processo</h3>
+                    <form id="form-gerenciar-turnos" class="config-form">
+                        <label for="select-gerenciar-processo">Selecione o Processo:</label>
+                        <select id="select-gerenciar-processo" required>
+                            <option value="processo 1">Processo 1</option>
+                            <option value="processo 2">Processo 2</option>
+                            <option value="processo 3">Processo 3</option>
+                            <option value="processo 4">Processo 4</option>
+                        </select>
+                        <hr>
+                        <h4>Turnos Disponíveis:</h4>
+                        <div id="lista-turnos-checkboxes" class="item-list">
+                            <p>Selecione um processo para ver os turnos.</p>
+                        </div>
+                        <button type="submit" id="btn-salvar-turnos">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div> <!-- FIM DA SEÇÃO DE CONFIGURAÇÕES -->
+
+</main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
